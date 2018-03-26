@@ -1,0 +1,278 @@
+(*) Warning.
+
+I'm currently unsatisfied with the protocol and the implementation is
+not finalized anyway. I may very soon rewrite the botnet from
+scratch. If you want to do it, let me know how you plan it.
+
+(*) Introduction
+
+This document describes the dansanet protocol, which is used between
+two dansarina robots. Using this protocol, two or more dansarinas
+create a network of servers, in which users connected on each
+dansarina can talk to each other, no matter which IRC network they
+are, or even if they are in an IRC network.
+
+Once X connects to Y, Y may print a few lines, like a banner, giving
+the user some information of how to operate dansarina; for example, Y
+may print:
+
+Welcome to Dansarina 0.56. Please, identify yourself by entering
+``username password'' on the same line. For example, ``dansa'' is your
+username, ``mumble'' is your password; so you enter
+
+                          dansa mumble
+
+and then you press enter. Got it? Have fun.
+
+This explanation is presented because some users may login by telnet,
+so users can take advantage of this explanation; robots are
+programmed, so they don't need to learn how to authenticate; they
+already know it. So as we suggest, this introduction is common to both
+users by telnet and dansarinas.
+
+(*) Handshaking
+
+After the authentication described in the introduction, robots will be
+identified and they begin the handshaking process; the handshaking
+process is the period of linking in which the following actions may
+take place:
+
+     (-) Ask for name identification
+     (-) Ask for version identification
+     (-) Ask for who is logged in
+
+After both parties have asked all they want, the link is considered
+``established.'' Notice that, as we suggest here, dansarinas are
+polite robots; that is, they don't usually speak before asked. A
+dansarina robot doesn't tell you who she is, or what version she is,
+until you ask.
+
+So, if X or Y wants to know anything, they have to ask. This helps the
+communication. For example, if I am not ready to listen to you, it's
+not useful for you to starting talking. But yes, dansarina is patient
+to wait up to some time limit; if X or Y does not ask or answer
+anything after x seconds, dansarina gets tired and offends the other
+robot by killing the connection.
+
+(*) Who are you?
+
+This command is issued to ask for name identification.
+
+Q: who-are-you
+A: i-am nickname [comment]
+
+For example
+
+X: who-are-you
+Y: i-am joana <DAL.net>
+
+That is, joana likes to say that she is a DAL.net user; but she
+doesn't have to. The required part is anything not in between
+brackets. She could very well just say
+
+X: who-are-you
+Y: i-am joana
+
+In fact, that's what most dansarinas do.
+
+(*) What version are you?
+
+Q: version
+A: vers 0.56
+
+That's it.
+
+(*) Who is logged in or linked with you?
+
+Q: users?
+A: join id robot channel nickname flags idle-number
+A: link branch leaf
+A: .
+
+The answer is a list of lines, so as an example, let's simulate one
+case. Supppose joana has two users, flag and muzgo; but flag is
+connected through another robot, called troller.
+
+X: users?
+Y: join troller-10 troller party flag muf 3600
+Y: join joana-10 joana party muzgo uf 60
+Y: link joana troller
+Y: .
+
+What does this mean? Well, flag is connected on troller (troller is
+linked to joana with direction troller -> joana) on socket 10, he has
+the flags m, u and f meaning ``master'', ``user'', ``friend'' and he's
+currently on the channel ``party'' which is the default one. Because
+of his flags, we know that the user ``flag'' is a master of the bot
+``troller.'' Also, we know he doesn't send any commands to dansarina
+for 3600 seconds.
+
+Now, muzgo is connected to joana directly and his socket number is 10;
+he is a user and friend of joana, he is idle for 60 seconds, and
+currently on the channel ``party.''
+
+As you can see, socket numbers are not a user identifier; to identify
+a user, you must use the pair (robot, socket-number). That's why we
+add the field ``id''; this field is a unique identifier; dansarinas
+always use this format: robotname-socketnumber. This way, a simple
+strncmp() allows us to find a user in the network; and yes, this
+mechanism allows users to log in more than one in any of the robots in
+a network.
+
+Also, at this stage of the communication, X or Y may notice a network
+loop by noticing that say a user is connected to a robot which is
+already on the someone's side of the network; but we may check this
+here and on the next phase; we check because we write defensive
+algorithms; the check will actually be made as soon as we ask
+``who-are-you'' and we always ask that once for each handshaking.
+
+We now explain the link command.
+
+Supppose joana has two robots in her network; they are, troller and
+lorota. Troller is connected to joana, so the direction is troller ->
+joana, while joana connected herself to lorota, so the direction is
+lorota <- joana. The way joana would say that this is the situation is
+by answering:
+
+Y: link joana troller
+Y: link lorota joana
+
+Notice that this answer comes after the join lines when a ``users?''
+is issued. I don't see reasons to separate users and robots into two
+different commands.
+
+So, joana is the branch of troller; troller is a leaf, while joana is
+herself a leaf of the branch lorota. But what if troller is a huge
+branch? Well, then when troller connected to joana, they would do the
+handshaking themselves, and by now we would know all peers because
+troller would've sent it to joana when he connected to her. Let's
+illustrate this case.
+
+Suppose troller has 3 robots connected to him; they are: dione, titan
+and tethis. Suppose dione is a branch of 2 other robots; they are,
+zeus and roxanne. So, when dione connected to troller, she sent:
+
+link dione zeus
+link dione roxanne
+
+And when troller connected to joana, he sent
+
+link troller dione
+link dione zeus
+link dione roxanne
+
+So that when joana connected to lorota, she sent
+
+link dione zeus
+link dione roxanne
+link troller dione
+link joana troller
+
+Got it? This way, any robot in the network can figure out what the
+network looks like. In this case, a diagram would look like
+
+              Z     R
+               \     \
+                \_____\___ D ______ T
+                                     \
+                                      \_____ J _____ L
+
+So, Z is zeus, R is roxanne, D is dione, T is troller, J is joana, and
+L is lorota. The topology is similar to an IRC network. What happens,
+however, when, say, L attempts a link with T? Well, then a loop is
+closed and this is not allowed. How to avoid the loop?
+
+When L connects to T, T will ask L who he is; L will say ``i-am
+lorota'' and T will check that he already knows L; that is, L is
+already on the network, so T drops the connection.
+
+But notice that this is defensive; because L is a dansarina robot, so
+L won't even attempt a connection. Any dansarina robot must ensure
+that only legal connections are attempted.
+
+The ``.'' ends the answer for the command ``users?''.
+
+(*) Nice to meet you
+
+A link is established by performing successfully all of the steps
+above. After this point, no more questions are allowed; only regular
+conversation. To formalize this, we create the command
+
+                          nice-to-meet-you.
+
+This commands means that now the robots know each other and no more
+introductory questions are allowed; that is, the following questions
+will result in end of conversation: ``who-are-you'', ``users?'' and
+``version''. But commands like ``join'', ``link'', ``part'' and others
+which we will describe later are still valid. 
+
+As an example, if X issues ``nice-to-meet-you'' and later issues a
+``who-are-you'' to Y, Y will offend X by killing the connection. 
+
+(*) Examples
+
+Let's look at some conversation samples so that we can have a good
+idea of how the handshaking takes place and the logic flow must be
+written. X requests connection to Y; so the following conversation
+takes place from the point of view of X. We write ``>>'' to mean
+output and ``<<'' to mean input.
+
+ << Welcome to Dansarina 0.56. 
+ << Please, enter username password:
+ >> joana mypassword
+ << welcome 
+ >> who-are-you
+ << i-am Y <DAL.net>
+ >> version
+ << vers 0.56
+ >> users?
+ << join troller-10 troller party flag
+ << join joana-10 joana party muzgo
+ << link Y Z
+ << link Z A
+ << link Z B
+ << .
+ >> nice-to-meet-you
+ << nice-to-meet-you
+
+From now on, only the next messages are allowed. 
+
+(*) Chat messages
+
+Syntax: chat bot channel nic message
+
+(*) Join messages
+
+Syntax: join id robot channel nickname
+
+(*) Part messages
+
+Syntax: part id robot channel nickname <mensagem>
+
+(*) Who is messages
+
+(*) Who messages
+
+(*) User private messages
+
+(*) Quit messages
+
+The bit map for stages has been defined as follows:
+
+PEER_CONN_NOT 0000 0000 0000 0000 0000 0000 0000 0001 = 0x00000001
+PEER_CONN_PRG 0000 0000 0000 0000 0000 0000 0000 0010 = 0x00000002
+PEER_CONN_RDY 0000 0000 0000 0000 0000 0000 0000 0100 = 0x00000004
+PEER_AUTH_USR 0000 0000 0000 0000 0000 0000 0000 1000 = 0x00000008
+PEER_AUTH_PWD 0000 0000 0000 0000 0000 0000 0001 0000 = 0x00000010
+                        /* reserved */
+PEER_INFO_LNK 0000 0000 0000 0000 0000 0000 1000 0000 = 0x00000080
+PEER_INFO_BOT 0000 0000 0000 0000 0000 0001 0000 0000 = 0x00000100
+PEER_LKIN_HEL 0000 0000 0000 0000 0000 0010 0000 0000 = 0x00000200
+PEER_LKIN_VER 0000 0000 0000 0000 0000 0100 0000 0000 = 0x00000400
+                        /* reserved */
+PEER_LOUT_PWD 0000 0000 0000 0000 0001 0000 0000 0000 = 0x00001000
+PEER_LOUT_HEL 0000 0000 0000 0000 0010 0000 0000 0000 = 0x00002000
+PEER_LOUT_VER 0000 0000 0000 0000 0100 0000 0000 0000 = 0x00004000
+PEER_LOUT_THB 0000 0000 0000 0000 1000 0000 0000 0000 = 0x00008000
+
+I may have changed the bip map; see peer.h for the latest version.

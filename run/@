@@ -1,0 +1,29 @@
+#!/usr/local/bin/python
+import popen2
+import sys
+
+path = "/usr/local/maple8/bin/maple -T7 -s -q -w0 -z" \
+       " -c \"interface(prettyprint=0, screenwidth=512);\""
+
+nick = sys.argv[1]
+user = sys.argv[2]
+host = sys.argv[3]
+chan = sys.argv[4]
+
+#opt = "".join(sys.argv[-1])
+
+c = popen2.Popen3(path)
+#c.tochild.write("display2d: false;")
+
+c.tochild.write(" ".join(sys.argv[5:]))
+c.tochild.write("; quit;")
+c.tochild.flush()
+c.tochild.close()
+c.wait()
+
+#if opt == "//pvt":
+#   print "PRIVMSG "+nick+" :" + "".join(c.fromchild.readlines())
+print "PRIVMSG #"+chan+" :"+nick+", "+"".join(c.fromchild.readlines())
+
+status = c.fromchild.close()
+# print "status: ", status

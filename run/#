@@ -1,0 +1,21 @@
+#!/usr/local/bin/python
+import popen2
+import sys
+
+path = "./compute"
+
+nick = sys.argv[1]
+user = sys.argv[2]
+host = sys.argv[3]
+chan = sys.argv[4]
+
+#opt = "".join(sys.argv[-1])
+
+c = popen2.Popen3(path)
+c.tochild.write(" ".join(sys.argv[5:]))
+c.tochild.flush()
+c.tochild.close()
+c.wait()
+
+print "PRIVMSG #"+chan+" :"+nick+", "+"".join(c.fromchild.readlines())
+status = c.fromchild.close()

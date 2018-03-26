@@ -1,0 +1,165 @@
+
+\documentclass[a4paper,12pt]{article}
+\usepackage{noweb}\pagestyle{noweb}\noweboptions{longxref,smallcode}
+\addtolength{\topmargin}{-0.5in}
+\setlength{\textheight}{9in}
+\setlength{\textwidth}{6.9in}
+\setlength{\oddsidemargin}{-.3in}
+\setlength{\evensidemargin}{-.1in}
+\pagestyle{noweb}
+
+\usepackage{amsmath}
+
+% tags
+\newcommand{\ver}{0.61}
+\newcommand{\fix}{\begin{verbatim}}
+\newcommand{\xif}{\end{verbatim}}
+
+% symbols
+\newcommand{\from}{\leftarrow}
+
+\begin{document}
+
+\def\nwendcode{\endtrivlist \endgroup}
+\let\nwdocspar=\par
+
+\date{Nov 1, 2005}
+\title{Dansarina}
+
+\author{Daniel C. Bastos\\
+        \tt{dbastos@math.utoledo.edu}}
+
+\maketitle
+
+\abstract{This document presents a few details of dansarina. Dansarina
+is an IRC robot written for portability. We describe in this document a
+few pieces of the source code in details, but, mainly, we provide
+general information about the development, including what has not yet
+been finalized, and all the problems we have been facing.}
+
+\setlength{\parskip}{7pt}
+\setlength{\parindent}{0pt}
+
+\section{Introduction} Dansarina is an IRC robot. She's composed of a
+small collection of programs which help each other to accomplish all the
+tasks that she performs. She has been written to be portable and
+simple. She has a very simple user interface and very easy to use ---
+see the installation and user interface sections for how to get her
+running for the first time --- not written yet; there is no installation
+yet, and no user interface anyway.
+
+Dansarina has a plugin system which allows programmers --- that can
+write [[sh]] and [[awk]] --- to extend her in a variety of ways. The
+scripts can take advantage of the network with the help of auxiliary
+programs to handle the network connections --- see the plugin system
+section for more information. So, dansarina is able to retrieve a
+paragraph from Wikipedia so that users can consult an encyclopedia while
+talking about a subject, she is able to consult an online dictionary, or
+perhaps perform a search in a database to answer how some Win32 API
+datatype is declared, et cetera. I have personally written these three
+plugins. But, the plugin system goes beyond that: with AWK, it's very
+nice to handle simple databases, and so dansarina is able to easily keep
+track of who's been in a channel, who has left, at what time, what did
+they say last, what was their quit message, et cetera. All of this and
+more can be changed or implemented by writing her plugins.
+
+Dansarina can connect to other dansarinas to form a network of
+dansarinas. Through the network, users can exchange messages, talk,
+manage each other's dansarinas, et cetera. 
+
+The network is created through some particular plugins, but separately
+from the plugin system introduced above --- this network is not yet
+created; the current network actually links only two dansarinas; not
+more than that. We want to distinguish between network plugins and
+regular plugins because the network requires a new kind of communication
+and bookeeping of information, so dansarina gets help with a different
+daemon --- different than the plugin daemon --- which handles all the
+network tasks by calling appropriate network plugins.
+
+\subsection{History}
+
+I have kept a history of dansarina's development. We're currently in the
+\ver\ version, but you can still see most of the packages on my
+homepage, including the early versions 0.1, 0.2, et cetera.
+
+If you look at each package individually you may see radical changes
+from one version to another, but such radical changes are only present
+in the early versions. For example, the first versions were written
+entirely in a ``literate programming'' model, but I gave up on that soon
+enough. The package has been without a nice documentation for most of
+its life, but on the version 0.60, I decided to bring back some of the
+``literate programming'' philosophy. I say ``some'' because I do it in
+my own way now; my own way is called the ``bit methodology'' and is
+described in the ``bit'' package, on my homepage.
+
+\subsection{Overview of the source code}
+
+Dansarina is an application that can't really take advantage of the UNIX
+standard io library; on the contrary, it would be harder to use it ---
+see, for example, the problems described ``UNIX Network Programming''
+volume one, by Richard Stevens. So, instead, we use a small io library
+designed by Daniel J. Bernstein. I wrote small libraries for most of the
+other tasks. For example, to handle socket operations, I wrote the
+socket library; to handle the hassles of controlling network buffers I
+wrote the peer library. For databases, I wrote the db library. For
+strings, I wrote the str library --- which is documented on my homepage;
+see my str package.
+
+I believe that the most important information about dansarina is how the
+source code is arranged, and the path of the flow of the
+program. Dansarina's starting point is written in [[dansarina.c]]. Upon
+startup, she reads her configuration and initializes some data
+structures --- for example, the peer array called [[user]].
+
+Every connection is considered a user, so even the listening sockets are
+attached to the [[user]] array, using the peer library. Dansarina
+distinguishes the IRC server from regular peers, so she process them
+separately --- the IRC server has somewhat a higher priority.
+
+Dansarina is somewhat event-driven. For example, when data comes in from
+the IRC server, dansarina analyzes the data and generates an event. She
+recognizes the events by one of her ``dispatch'' functions in
+[[events.c]]. In the same file, we have the [[event]] arrays which are
+lookup tables that inform dansarina who is responsible for which event
+--- the lookup job is done by the function [[find]]. This is it.
+
+\subsection{Authentication of peers}
+
+Authentication is required when a DCC CHAT from a user is issued to
+dansarina, or when another dansarina wants to link herself to
+dansarina. 
+
+The peer library uses an array of [[struct peer]]. A peer structure
+groups the input and output io buffers, and it includes some variables
+for control. For example, if [[peer.cont]] is non-zero, then a line that
+was being read from the network has not completely arrived yet; so on a
+next read, data will be concatenated.
+
+A peer goes through many stages upon connection. For example, when a
+``DCC chat'' is issued, we already know the nickname of the user, so we
+set the bit [[PEER_AUTH_USR]] on the user's stage [[unsigned long]]
+variable. By invoking [[peer_auth]], we'll read and check the user's
+password, then.
+
+The stage level is interesting for linking robots, because robots go
+through many stages. A robot is connected only after all stages of the
+protocol have been successfuly terminated.
+
+\subsection{Databases}
+
+For detailed information on the database library, see the db package on
+my homepage; it describes the database interface and its limitations.
+The database has some serious limitations on performance, but no
+performance issue should affect very small databases.
+
+Dansarina needs a user database; the [[usr/]] directory. There, you will
+find a record per user. The format of each record is easily parsed. The
+protocol is netstrings; see
+%
+            $$\text{http://cr.yp.to/proto/netstrings.txt}.$$
+%
+User records are structured as follows: nickname, hostname, password,
+user flags, UNIX timestamp with creation date, UNIX timestamp with last
+seen date. Each user record is kept in memory in a [[struct urecord]]
+--- see [[user.h]].
+

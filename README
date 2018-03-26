@@ -1,0 +1,126 @@
+Sat Aug 12 08:44:30 EDT 2006. I rewrote the plugin system. Now the
+plugin system is composed by a daemon called plugger. The daemon is
+responsible to handle all the plugin work. I like it.
+
+Sun Jun 25 07:19:51 EDT 2006. I've implemented a plug in system. Now
+we can take advantage of scripts. Users who type ``@program arg1 arg2
+... argn'' cause dansarina to run program with the args in argv[] and
+she outputs it back. So now we can implement a lot of features. See
+PLUGINS for more information.
+
+Sun Mar 12 03:19:19 GMT 2006. Linking has been done. Dansarina links
+to herself in both ways. We can see users coming in, out, and messages
+flow freely. We now have to check the consistency of the network; it's
+time to fix any possible problem and write the defensive programming
+that we usually do. The problem is: I have one more day only; my
+classes will start and I will only be able to get back to dansarina on
+Summer. Society sucks.
+
+Sun Mar 12 03:12:31 GMT 2006. Anything that has been said about
+eggdrop must be thrown away. It was not worth at all to attempt a
+compatibility with eggdrop. First, eggdrop doesn't have a protocol
+written; you have to read eggdrop's source code. Second, the guys on
+eggdrop development team hardly seem to care about the fact that you
+exist and that you are working on a similar project which will be
+compatible with their work. Besides, I thought that dansarina would be
+garbage if she would have to speak that horrible eggnet protocol. And
+imagine... these guys don't care about you; you write some compatible
+code today, tomorrow they change their code and you'd be behind. It's
+not worth; if they had made some contact, it would be great, but they
+don't care about you, so whatever.
+
+Tue Jan 03 23:59:50 GMT 2006. Here's an eggdrop network that we can
+link to. Finally someone not so scared to the point of providing easy
+linking information. The name is Lurker and hostname is mcss.dynip.com
+with port 33333.
+
+Fri Dec 16 22:05:29 GMT 2005. I'm not too happy with my string
+library, neither with my db library. I'm thinking about not working
+with dynamic strings anymore. Turn it off and work with non-dynamic
+buffers. If size exceeds size of buffers, data is truncated; no
+mallocs required.
+
+Sun Dec 11 14:01:27 GMT 2005. By the way, the string library
+implements heap memory allocation. In the very beginning we said we
+would only use static buffers, but what we meant was static network
+buffers only; we use strings with heap memory now. However, I'm
+planning to create a temporary allocation scheme which will not use
+heap memory.
+
+The idea is: if you software needs little memory for a while, use your
+own storage of memory. If your software happens to need more memory,
+then go ahead and allocate from the heap. I will implement this in the
+string library and it will be completely transparent to this software.
+
+Sun Dec 11 13:48:09 GMT 2005. Plain text password has been
+implemented. A two-way password scheme that generates a printable hash
+of each plain text string could be implemented.
+
+Sat Dec 10 19:02:32 GMT 2005. User flags will follow the eggdrop
+model. So, n = owner, m = master, t = botnet-master, a = autoop, o =
+op, y = auto-halfop, l = halfop, g = auto-voice, v = voice, f =
+friend, p = party, q = quiet, r = dehalfop, d = deop, k = auto-kick, x
+= xfer, j = janitor, c = common, b = bot, w = wasop-test, z =
+washalfop-test, e = nethack-exempt, u = unshared, h = highlight. We
+will not use all of these flags, but the features we will implement
+will match these --- for compatibility.
+
+Sat Dec 10 16:16:19 GMT 2005. User records will be stored as
+netstrings. For example, if we want to store nickname, hostname and
+date, we would store it as
+
+                        x:nick,y:host,z:date,
+
+Notice the ending comma. Here, x, y and z are uint32_t formated as
+strings and they indicate the length of the string that follows right
+after ``:'' and each field ends with a comma. This allows for easy
+parsing: we always know how much we're gonna have to read. The
+sequence of parsing should always be:
+
+ scan_uint32(buffer, &u); ++buffer; /* skip : */
+ read_u_bytes(buffer, u, &f1); ++buffer; /* skip , */
+
+And if we need to read another field, we would just repeat the same.
+
+ scan_uint32(buffer, &u); ++buffer; /* skip : */
+ read_u_bytes(buffer, u, &f2); ++buffer; /* skip , */
+
+We can attach each of these fields into a structure that describes the
+user record. The same idea would be applied to any other database we
+may have. See user.h for more information on user records.
+
+Sat Dec 10 14:43:48 GMT 2005. I didn't like the complexity of
+W. R. Steven's database with the fact that it wouldn't handle locking
+very well because of the nature of UNIX locking. Besides, I don't need
+locking. I decided to write a simple database which stores key/value
+pairs in a directory; that's what I did, but the results were far from
+what I expected. See my db package.
+
+Thu Dec 01 14:21:30 GMT 2005. Library peer.a seems fine. It's time to
+work on saving user's data. I was thinking of implementing
+W. R. Steven's database. It would take me some time, but I think it's
+healthy to my education; the library is simple, but quite fast. It
+uses a chained hash table. I don't know how fast it is compared to the
+GNU gdbm library. If I write it, I will test. I don't believe the GNU
+gdbm would be slower, but I am not sure.
+
+Sun Nov 13 12:49:07 GMT 2005. The algorithm is better; I don't know if
+it's perfect. It's hard, but also because I'm trying to satisfy
+everyone: some servers end lines with \n, some with \r\n. Some clients
+end line with \n, some with \r\n and some with \r\0. So, to read from
+them, line by line, is not the most trivial task --- not to me. I
+wrote peer.a to handle these problems.
+
+Sun Nov 06 05:21:55 GMT 2005. The algorithm I wrote yesterday doesn't
+work. I mean, it works for buffers arriving with one or less lines;
+whenever a socket receives more than one line, the algorithm makes a
+mistake which is not even worth describing.
+
+Sat Nov 05 10:36:32 GMT 2005. I wrote a mini library called peer.a
+which implements peer_feed() and peer_getln() which does the job
+without hacking djb's io library.
+
+Sat Nov 01 15:56:26 GMT 2005. The intention is to create a function
+getln() that will work with the base code of djb but without his
+alloc.a library and without dynamic buffers of any sort. We want
+static buffers everywhere.

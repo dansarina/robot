@@ -1,0 +1,5 @@
+#!/bin/sh
+sleep 4
+echo "PRIVMSG #$4 :$1, I'm sl..."
+sleep 2
+echo "PRIVMSG #$4 :ow. Geez, I'm so slow..."

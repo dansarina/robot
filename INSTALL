@@ -1,0 +1,39 @@
+To compile, just ``make.'' Before you run dansarina, make sure you tell
+her where to go, which name to use, which ports, and which channel to
+join, et cetera. For example, to set the IRC server, just say
+
+                     echo irc.dal.net > ctl/rsserv
+
+and notice that rsserv means ``remote server.'' The file myport is a
+local port which dansarina will listen for telnet connections; you can
+control her through this connection --- as you can through a DCC CHAT,
+but make sure she is not behind a firewall for a DCC CHAT.
+
+Before you try to telnet or DCC CHAT to her, log her in the IRC server
+and say hello to her with 
+
+                          /msg dansarina hello
+
+where dansarina is her nickname; if you call her britney, then write
+britney. After saying hello, set a password with
+
+                       /msg dansarina pass mumble
+
+where mumble is your password. The first user who says hello becomes her
+master.
+
+The programs in run/ are plugins. They are called by saying @filename in
+a channel where dansarina is in. To get her in other channels, make a
+DCC CHAT to her, and say
+
+                           .raw JOIN #channel
+
+and in this fashion, she can perform any IRC command such as 
+
+                           .raw NICK britney
+
+and 
+
+              .raw PRIVMSG nickserv :identify dropdeadfred
+
+et cetera.

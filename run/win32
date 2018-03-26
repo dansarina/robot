@@ -1,0 +1,193 @@
+#!/usr/bin/awk -f
+# This program must receive five arguments on the command
+# line. The arguments are: nickname, username, hostname,
+# channel, argument; in that order. So, a valid execution is
+#
+#    ./win32 dansa db4st0s my.free.dom.to 0xff INT_PTR
+# 
+# After argv validation, it reads itself line by line
+# looking for a record whose key matches the fifth argument;
+# in the example above, the fifth argument is INT_PTR. If it
+# finds, it prints the record data. Records are lines that
+# start with #$$ . Note that there's a space after the last
+# dollar sign.
+
+BEGIN {
+  if (ARGC < 5) exit 1;
+
+  printf "PRIVMSG #" ARGV[4] " :";
+
+  if (ARGC < 6) { print "Which key?"; exit 0; }
+
+  while (getline x < "./run/win32" > 0)
+    if (x ~ /^\#\$\$/) {
+      n = split(x, dat, " @ ");
+      for (f in dat) 
+        if (dat[1] == "#$$ " ARGV[5])  { print dat[2]; exit 0; }
+    }
+
+  print "Sorry, I don't know about " ARGV[5];
+
+}
+
+#$$ ATOM @ For more information, see ``Atoms.'' This type is declared in WinDef.h as follows: typedef WORD ATOM;
+#$$ BOOL @ Boolean variable (should be TRUE or FALSE). This type is declared in WinDef.h as follows: typedef int BOOL;
+#$$ BOOLEAN @ Boolean variable (should be TRUE or FALSE). This type is declared in WinNT.h as follows: typedef BYTE BOOLEAN;
+#$$ BYTE @ Byte (8 bits). This type is declared in WinDef.h as follows: typedef unsigned char BYTE;
+#$$ CALLBACK @ Calling convention for callback functions. This type is declared in WinDef.h as follows: #define CALLBACK __stdcall
+#$$ CHAR @ 8-bit Windows (ANSI) character. For more information, see ``Character Sets Used By Fonts.'' This type is declared in WinNT.h as follows: typedef char CHAR;
+#$$ COLORREF @ Red, green, blue (RGB) color value (32 bits). See ``COLORREF'' for information on this type. This type is declared in WinDef.h as follows: typedef DWORD COLORREF;
+#$$ CONST @ Variable whose value is to remain constant during execution. This type is declared in WinDef.h as follows: #define CONST const
+#$$ DWORD @ 32-bit unsigned integer. This type is declared in WinDef.h as follows: typedef unsigned long DWORD;
+#$$ DWORDLONG @ 64-bit unsigned integer. This type is declared in WinNT.h as follows: typedef ULONGLONG DWORDLONG;
+#$$ DWORD_PTR @ Unsigned long type for pointer precision. Use when casting a pointer to a long type to perform pointer arithmetic. (Also commonly used for general 32-bit parameters that have been extended to 64 bits in 64-bit Windows. ) This type is declared in BaseTsd.h as follows: typedef ULONG_PTR DWORD_PTR;
+#$$ DWORD32 @ 32-bit unsigned integer. This type is declared in BaseTsd.h as follows: typedef unsigned int DWORD32;
+#$$ DWORD64 @ 64-bit unsigned integer. This type is declared in BaseTsd.h as follows: typedef unsigned __int64 DWORD64;
+#$$ FLOAT @ Floating-point variable. This type is declared in WinDef.h as follows: typedef float FLOAT;
+#$$ HACCEL @ Handle to an accelerator table. This type is declared in WinDef.h as follows: typedef HANDLE HACCEL;
+#$$ HALF_PTR @ Half the size of a pointer. Use within a structure that contains a pointer and two small fields. This type is declared in Basetsd.h as follows: #ifdef _WIN64 \n typedef int HALF_PTR; \n #else \n typedef short HALF_PTR; \n #endif
+#$$ HANDLE @ Handle to an object. This type is declared in WinNT.h as follows: typedef PVOID HANDLE;
+#$$ HBITMAP @ Handle to a bitmap. This type is declared in WinDef.h as follows: typedef HANDLE HBITMAP;
+#$$ HBRUSH @ Handle to a brush. This type is declared in WinDef.h as follows: typedef HANDLE HBRUSH;
+#$$ HCOLORSPACE @ Handle to a color space. This type is declared in WinDef.h as follows: #if(WINVER <= 0x0400) \n typedef HANDLE HCOLORSPACE; \n #endif
+#$$ HCONV @ Handle to a dynamic data exchange (DDE) conversation. This type is declared in Ddeml.h as follows: typedef HANDLE HCONV;
+#$$ HCONVLIST @ Handle to a DDE conversation list. This type is declared in Ddeml.h as follows: typedef HANDLE HCONVLIST;
+#$$ HCURSOR @ Handle to a cursor. This type is declared in WinDef.h as follows: typedef HICON HCURSOR;
+#$$ HDC @ Handle to a device context (DC). This type is declared in WinDef.h as follows: typedef HANDLE HDC;
+#$$ HDDEDATA @ Handle to DDE data. This type is declared in Ddeml.h as follows: typedef HANDLE HDDEDATA;
+#$$ HDESK @ Handle to a desktop. This type is declared in WinDef.h as follows: typedef HANDLE HDESK;
+#$$ HDROP @ Handle to an internal drop structure. This type is declared in ShellApi.h as follows: typedef HANDLE HDROP;
+#$$ HDWP @ Handle to a deferred window position structure. This type is declared in WinUser.h as follows: typedef HANDLE HDWP;
+#$$ HENHMETAFILE @ Handle to an enhanced metafile. This type is declared in WinDef.h as follows: typedef HANDLE HENHMETAFILE;
+#$$ HFILE @ Handle to a file opened by OpenFile, not CreateFile. This type is declared in WinDef.h as follows: typedef int HFILE;
+#$$ HFONT @ Handle to a font. This type is declared in WinDef.h as follows: typedef HANDLE HFONT;
+#$$ HGDIOBJ @ Handle to a GDI object. This type is declared in WinDef.h as follows: typedef HANDLE HGDIOBJ;
+#$$ HGLOBAL @ Handle to a global memory block. This type is declared in WinDef.h as follows: typedef HANDLE HGLOBAL;
+#$$ HHOOK @ Handle to a hook. This type is declared in WinDef.h as follows: typedef HANDLE HHOOK;
+#$$ HICON @ Handle to an icon. This type is declared in WinDef.h as follows: typedef HANDLE HICON;
+#$$ HINSTANCE @ Handle to an instance. This type is declared in WinDef.h as follows: typedef HANDLE HINSTANCE;
+#$$ HKEY @ Handle to a registry key. This type is declared in WinDef.h as follows: typedef HANDLE HKEY;
+#$$ HKL @ Input locale identifier. This type is declared in WinDef.h as follows: typedef HANDLE HKL;
+#$$ HLOCAL @ Handle to a local memory block. This type is declared in WinDef.h as follows: typedef HANDLE HLOCAL;
+#$$ HMENU @ Handle to a menu. This type is declared in WinDef.h as follows: typedef HANDLE HMENU;
+#$$ HMETAFILE @ Handle to a metafile. This type is declared in WinDef.h as follows: typedef HANDLE HMETAFILE;
+#$$ HMODULE @ Handle to a module. The value is the base address of the module. This type is declared in WinDef.h as follows: typedef HINSTANCE HMODULE;
+#$$ HMONITOR @ Handle to a display monitor. This type is declared in WinDef.h as follows: if(WINVER <= 0x0500) typedef HANDLE HMONITOR;
+#$$ HPALETTE @ Handle to a palette. This type is declared in WinDef.h as follows: typedef HANDLE HPALETTE;
+#$$ HPEN @ Handle to a pen. This type is declared in WinDef.h as follows: typedef HANDLE HPEN;
+#$$ HRESULT @ Return code used by interfaces. It is zero upon success and nonzero to represent an error code or status information. This type is declared in WinNT.h as follows: typedef LONG HRESULT;
+#$$ HRGN @ Handle to a region. This type is declared in WinDef.h as follows: typedef HANDLE HRGN;
+#$$ HRSRC @ Handle to a resource. This type is declared in WinDef.h as follows: typedef HANDLE HRSRC;
+#$$ HSZ @ Handle to a DDE string. This type is declared in Ddeml.h as follows: typedef HANDLE HSZ;
+#$$ HWINSTA @ Handle to a window station. This type is declared in WinDef.h as follows: typedef HANDLE WINSTA;
+#$$ HWND @ Handle to a window. This type is declared in WinDef.h as follows: typedef HANDLE HWND;
+#$$ INT @ 32-bit signed integer. This type is declared in WinDef.h as follows: typedef int INT;
+#$$ INT_PTR @ Signed integer type for pointer precision. Use when casting a pointer to an integer to perform pointer arithmetic. This type is declared in BaseTsd.h as follows: #if defined(_WIN64) \n typedef __int64 INT_PTR; \n #else \n typedef int INT_PTR; \n #endif
+#$$ INT32 @ 32-bit signed integer. This type is declared in BaseTsd.h as follows: typedef signed int INT32;
+#$$ INT64 @ 64-bit signed integer. This type is declared in BaseTsd.h as follows: typedef signed __int64 INT64;
+#$$ LANGID @ Language identifier. For more information, see ``Locales.'' This type is declared in WinNT.h as follows: typedef WORD LANGID;
+#$$ LCID @ Locale identifier. For more information, see ``Locales.'' This type is declared in WinNT.h as follows: typedef DWORD LCID;
+#$$ LCTYPE @ Locale information type. For a list, see ``Locale and Language Information.'' This type is declared in WinNls.h as follows: typedef DWORD LCTYPE;
+#$$ LGRPID @ Language group identifier. For a list, see ``EnumLanguageGroupLocales.'' This type is declared in WinNls.h as follows: typedef DWORD LGRPID;
+#$$ LONG @ 32-bit signed integer. This type is declared in WinNT.h as follows: typedef long LONG;
+#$$ LONGLONG @ 64-bit signed integer. This type is declared in WinNT.h as follows: #if !defined(_M_IX86) \n typedef __int64 LONGLONG; \n #else \n typedef double LONGLONG; \n #endif
+#$$ LONG_PTR @ Signed long type for pointer precision. Use when casting a pointer to a long to perform pointer arithmetic. This type is declared in BaseTsd.h as follows: #if defined(_WIN64) \n typedef __int64 LONG_PTR; \n #else \n typedef long LONG_PTR; \n #endif
+#$$ LONG32 @ 32-bit signed integer. This type is declared in BaseTsd.h as follows: typedef signed int LONG32;
+#$$ LONG64 @ 64-bit signed integer. This type is declared in BaseTsd.h as follows: typedef __int64 LONG64;
+#$$ LPARAM @ Message parameter. This type is declared in WinDef.h as follows: typedef LONG_PTR LPARAM;
+#$$ LPBOOL @ Pointer to a BOOL. This type is declared in WinDef.h as follows: typedef BOOL far *LPBOOL;
+#$$ LPBYTE @ Pointer to a BYTE. This type is declared in WinDef.h as follows: typedef BYTE far *LPBYTE;
+#$$ LPCOLORREF @ Pointer to a COLORREF value. This type is declared in WinDef.h as follows: typedef DWORD *LPCOLORREF;
+#$$ LPCSTR @ Pointer to a constant null-terminated string of 8-bit Windows (ANSI) characters. For more information, see ``Character Sets Used By Fonts.'' This type is declared in WinNT.h as follows: typedef __nullterminated CONST CHAR *LPCSTR;
+#$$ LPCTSTR @ An LPCWSTR if UNICODE is defined, an LPCSTR otherwise. This type is declared in WinNT.h as follows: #ifdef UNICODE \n typedef LPCWSTR LPCTSTR; \n #else \n typedef LPCSTR LPCTSTR; \n #endif
+#$$ LPCVOID @ Pointer to a constant of any type. This type is declared in WinDef.h as follows: typedef CONST void *LPCVOID;
+#$$ LPCWSTR @ Pointer to a constant null-terminated string of 16-bit Unicode characters. For more information, see ``Character Sets Used By Fonts.'' This type is declared in WinNT.h as follows: typedef CONST WCHAR *LPCWSTR;
+#$$ LPDWORD @ Pointer to a DWORD. This type is declared in WinDef.h as follows: typedef DWORD *LPDWORD;
+#$$ LPHANDLE @ Pointer to a HANDLE. This type is declared in WinDef.h as follows: typedef HANDLE *LPHANDLE;
+#$$ LPINT @ Pointer to an INT. This type is declared in WinDef.h as follows: typedef int *LPINT;
+#$$ LPLONG @ Pointer to a LONG. This type is declared in WinDef.h as follows: typedef long *LPLONG;
+#$$ LPSTR @ Pointer to a null-terminated string of 8-bit Windows (ANSI) characters. For more information, see ``Character Sets Used By Fonts.'' This type is declared in WinNT.h as follows: typedef CHAR *LPSTR;
+#$$ LPTSTR @ An LPWSTR if UNICODE is defined, an LPSTR otherwise. This type is declared in WinNT.h as follows: #ifdef UNICODE \n typedef LPWSTR LPTSTR; \n #else \n typedef LPSTR LPTSTR; #endif
+#$$ LPVOID @ Pointer to any type. This type is declared in WinDef.h as follows: typedef void *LPVOID;
+#$$ LPWORD @ Pointer to a WORD. This type is declared in WinDef.h as follows: typedef WORD *LPWORD;
+#$$ LPWSTR @ Pointer to a null-terminated string of 16-bit Unicode characters. For more information, see ``Character Sets Used By Fonts.'' This type is declared in WinNT.h as follows: typedef WCHAR *LPWSTR;
+#$$ LRESULT @ Signed result of message processing. This type is declared in WinDef.h as follows: typedef LONG_PTR LRESULT;
+#$$ PBOOL @ Pointer to a BOOL. This type is declared in WinDef.h as follows: typedef BOOL *PBOOL;
+#$$ PBOOLEAN @ Pointer to a BOOL. This type is declared in WinNT.h as follows: typedef BOOLEAN *PBOOLEAN;
+#$$ PBYTE @ Pointer to a BYTE. This type is declared in WinDef.h as follows: typedef BYTE *PBYTE;
+#$$ PCHAR @ Pointer to a CHAR. This type is declared in WinNT.h as follows: typedef CHAR *PCHAR;
+#$$ PCSTR @ Pointer to a constant null-terminated string of 8-bit Windows (ANSI) characters. For more information, see ``Character Sets Used By Fonts.'' This type is declared in WinNT.h as follows: typedef CONST CHAR *PCSTR;
+#$$ PCTSTR @ A PCWSTR if UNICODE is defined, a PCSTR otherwise. This type is declared in WinNT.h as follows: #ifdef UNICODE \n typedef LPCWSTR PCTSTR; \n #else \n typedef LPCSTR PCTSTR; \n #endif
+#$$ PCWSTR @ Pointer to a constant null-terminated string of 16-bit Unicode characters. For more information, see ``Character Sets Used By Fonts.'' This type is declared in WinNT.h as follows: typedef CONST WCHAR *PCWSTR;
+#$$ PDWORD @ Pointer to a DWORD. This type is declared in WinDef.h as follows: typedef DWORD *PDWORD;
+#$$ PDWORDLONG @ Pointer to a DWORDLONG. This type is declared in WinNT.h as follows: typedef DWORDLONG *PDWORDLONG;
+#$$ PDWORD_PTR @ Pointer to a DWORD_PTR. This type is declared in BaseTsd.h as follows: typedef DWORD_PTR *PDWORD_PTR;
+#$$ PDWORD32 @ Pointer to a DWORD32. This type is declared in BaseTsd.h as follows: typedef DWORD32 *PDWORD32;
+#$$ PDWORD64 @ Pointer to a DWORD64. This type is declared in BaseTsd.h as follows: typedef DWORD64 *PDWORD64;
+#$$ PFLOAT @ Pointer to a FLOAT. This type is declared in WinDef.h as follows: typedef FLOAT *PFLOAT;
+#$$ PHALF_PTR @ Pointer to a HALF_PTR. This type is declared in Basetsd.h as follows: #ifdef _WIN64 \n typedef HALF_PTR *PHALF_PTR; \n #else \n typedef HALF_PTR *PHALF_PTR; \n #endif
+#$$ PHANDLE @ Pointer to a HANDLE. This type is declared in WinNT.h as follows: typedef HANDLE *PHANDLE;
+#$$ PHKEY @ Pointer to an HKEY. This type is declared in WinDef.h as follows: typedef HKEY *PHKEY;
+#$$ PINT @ Pointer to an INT. This type is declared in WinDef.h as follows: typedef int *PINT;
+#$$ PINT_PTR @ Pointer to an INT_PTR. This type is declared in BaseTsd.h as follows: typedef INT_PTR *PINT_PTR;
+#$$ PINT32 @ Pointer to an INT32. This type is declared in BaseTsd.h as follows: typedef INT32 *PINT32;
+#$$ PINT64 @ Pointer to an INT64. This type is declared in BaseTsd.h as follows: typedef INT64 *PINT64;
+#$$ PLCID @ Pointer to an LCID. This type is declared in WinNT.h as follows: typedef PDWORD PLCID;
+#$$ PLONG @ Pointer to a LONG. This type is declared in WinNT.h as follows: typedef LONG *PLONG;
+#$$ PLONGLONG @ Pointer to a LONGLONG. This type is declared in WinNT.h as follows: typedef LONGLONG *PLONGLONG;
+#$$ PLONG_PTR @ Pointer to a LONG_PTR. This type is declared in BaseTsd.h as follows: typedef LONG_PTR *PLONG_PTR;
+#$$ PLONG32 @ Pointer to a LONG32. This type is declared in BaseTsd.h as follows: typedef LONG32 *PLONG32;
+#$$ PLONG64 @ Pointer to a LONG64. This type is declared in BaseTsd.h as follows: typedef LONG64 *PLONG64;
+#$$ POINTER_32 @ 32-bit pointer. On a 32-bit system, this is a native pointer. On a 64-bit system, this is a truncated 64-bit pointer. This type is declared in BaseTsd.h as follows: #if defined(_WIN64) \n #define POINTER_32 __ptr32 \n #else \n #define POINTER32 \n #endif
+#$$ POINTER_64 @ 64-bit pointer. On a 64-bit system, this is a native pointer. On a 32-bit system, this is a sign-extended 32-bit pointer. Note that it is not safe to assume the state of the high pointer bit. This type is declared in BaseTsd.h as follows: #define POINTER_64 __ptr64
+#$$ POINTER_SIGNED @ A signed pointer. This type is declared in BaseTsd.h as follows: #define POINTER_SIGNED __sptr
+#$$ POINTER_UNSIGNED @ An unsigned pointer. This type is declared in BaseTsd.h as follows: #define POINTER_UNSIGNED __uptr
+#$$ PSHORT @ Pointer to a SHORT. This type is declared in WinNT.h as follows: typedef SHORT *PSHORT;
+#$$ PSIZE_T @ Pointer to a SIZE_T. This type is declared in BaseTsd.h as follows: typedef SIZE_T *PSIZE_T;
+#$$ PSSIZE_T @ Pointer to a SSIZE_T. This type is declared in BaseTsd.h as follows: typedef SSIZE_T *PSSIZE_T;
+#$$ PSTR @ Pointer to a null-terminated string of 8-bit Windows (ANSI) characters. For more information, see ``Character Sets Used By Fonts.'' This type is declared in WinNT.h as follows: typedef CHAR *PSTR;
+#$$ PTBYTE @ Pointer to a TBYTE. This type is declared in WinNT.h as follows: typedef TBYTE *PTBYTE;
+#$$ PTCHAR @ Pointer to a TCHAR. This type is declared in WinNT.h as follows: typedef TCHAR *PTCHAR;
+#$$ PTSTR @ A PWSTR if UNICODE is defined, a PSTR otherwise. This type is declared in WinNT.h as follows: #ifdef UNICODE \n typedef LPWSTR PTSTR; \n #else typedef LPSTR PTSTR; \n #endif
+#$$ PUCHAR @ Pointer to a UCHAR. This type is declared in WinDef.h as follows: typedef UCHAR *PUCHAR;
+#$$ PUHALF_PTR @ Pointer to a UHALF_PTR. This type is declared in Basetsd.h as follows: #ifdef _WIN64 \n typedef UHALF_PTR *PUHALF_PTR; \n #else \n typedef UHALF_PTR *PUHALF_PTR; \n #endif
+#$$ PUINT @ Pointer to a UINT. This type is declared in WinDef.h as follows: typedef UINT *PUINT;
+#$$ PUINT_PTR @ Pointer to a UINT_PTR. This type is declared in BaseTsd.h as follows: typedef UINT_PTR *PUINT_PTR;
+#$$ PUINT32 @ Pointer to a UINT32. This type is declared in BaseTsd.h as follows: typedef UINT32 *PUINT32;
+#$$ PUINT64 @ Pointer to a UINT64. This type is declared in BaseTsd.h as follows: typedef UINT64 *PUINT64;
+#$$ PULONG @ Pointer to a ULONG. This type is declared in WinDef.h as follows: typedef ULONG *PULONG;
+#$$ PULONGLONG @ Pointer to a ULONGLONG. This type is declared in WinDef.h as follows: typedef ULONGLONG *PULONGLONG;
+#$$ PULONG_PTR @ Pointer to a ULONG_PTR. This type is declared in BaseTsd.h as follows: typedef ULONG_PTR *PULONG_PTR;
+#$$ PULONG32 @ Pointer to a ULONG32. This type is declared in BaseTsd.h as follows: typedef ULONG32 *PULONG32;
+#$$ PULONG64 @ Pointer to a ULONG64. This type is declared in BaseTsd.h as follows: typedef ULONG64 *PULONG64;
+#$$ PUSHORT @ Pointer to a USHORT. This type is declared in WinDef.h as follows: typedef USHORT *PUSHORT;
+#$$ PVOID @ Pointer to any type. This type is declared in WinNT.h as follows: typedef void *PVOID;
+#$$ PWCHAR @ Pointer to a WCHAR. This type is declared in WinNT.h as follows: typedef WCHAR *PWCHAR;
+#$$ PWORD @ Pointer to a WORD. This type is declared in WinDef.h as follows: typedef WORD *PWORD;
+#$$ PWSTR @ Pointer to a null- terminated string of 16-bit Unicode characters. For more information, see ``Character Sets Used By Fonts.'' This type is declared in WinNT.h as follows: typedef WCHAR *PWSTR;
+#$$ SC_HANDLE @ Handle to a service control manager database. For more information, see ``SCM Handles.'' This type is declared in WinSvc.h as follows: typedef HANDLE SC_HANDLE;
+#$$ SC_LOCK @ Lock to a service control manager database. For more information, see ``SCM Handles.'' This type is declared in WinSvc.h as follows: typedef LPVOID SC_LOCK;
+#$$ SERVICE_STATUS_HANDLE @ Handle to a service status value. For more information, see ``SCM Handles.'' This type is declared in WinSvc.h as follows: typedef HANDLE SERVICE_STATUS_HANDLE;
+#$$ SHORT @ Short integer (16 bits). This type is declared in WinNT.h as follows: typedef short SHORT;
+#$$ SIZE_T @ The maximum number of bytes to which a pointer can point. Use for a count that must span the full range of a pointer. This type is declared in BaseTsd.h as follows: typedef ULONG_PTR SIZE_T;
+#$$ SSIZE_T @ Signed SIZE_T. This type is declared in BaseTsd.h as follows: typedef LONG_PTR SSIZE_T;
+#$$ TBYTE @ A WCHAR if UNICODE is defined, a CHAR otherwise. This type is declared in WinNT.h as follows: #ifdef UNICODE \n typedef WCHAR TBYTE; \n #else \n typedef unsigned char TBYTE; \n #endif
+#$$ TCHAR @ A WCHAR if UNICODE is defined, a CHAR otherwise. This type is declared in WinNT.h as follows: #ifdef UNICODE \n typedef WCHAR TCHAR; \n #else \n typedef char TCHAR; \n #endif
+#$$ UCHAR @ Unsigned CHAR. This type is declared in WinDef.h as follows: typedef unsigned char UCHAR;
+#$$ UHALF_PTR @ Unsigned HALF_PTR. Use within a structure that contains a pointer and two small fields. This type is declared in Basetsd.h as follows: #ifdef _WIN64 \n typedef unsigned int UHALF_PTR; \n #else \n typedef unsigned short UHALF_PTR; \n #endif
+#$$ UINT @ Unsigned INT. This type is declared in WinDef.h as follows: typedef unsigned int UINT; 
+#$$ UINT_PTR @ Unsigned INT_PTR. This type is declared in BaseTsd.h as follows: #if defined(_WIN64) \n typedef unsigned __int64 UINT_PTR; \n #else \n typedef unsigned int UINT_PTR; \n #endif
+#$$ UINT32 @ Unsigned INT32. This type is declared in BaseTsd.h as follows: typedef unsigned int UINT32;
+#$$ UINT64 @ Unsigned INT64. This type is declared in BaseTsd.h as follows: typedef usigned __int 64 UINT64;
+#$$ ULONG @ Unsigned LONG. This type is declared in WinDef.h as follows: typedef unsigned long ULONG;
+#$$ ULONGLONG @ 64-bit unsigned integer. This type is declared in WinNT.h as follows: #if !defined(_M_IX86) \n typedef unsigned __int64 ULONGLONG; \n #else \n typedef double ULONGLONG \n #endif
+#$$ ULONG_PTR @ Unsigned LONG_PTR. This type is declared in BaseTsd.h as follows: #if defined(_WIN64) \n typedef unsigned __int64 ULONG_PTR; \n #else \n typedef unsigned long ULONG_PTR; \n #endif
+#$$ ULONG32 @ Unsigned LONG32. This type is declared in BaseTsd.h as follows: typedef unsigned int ULONG32;
+#$$ ULONG64 @ Unsigned LONG64. This type is declared in BaseTsd.h as follows: typedef unsigned __int64 ULONG64;
+#$$ USHORT @ Unsigned SHORT. This type is declared in WinDef.h as follows: typedef unsigned short USHORT;
+#$$ USN @ Update sequence number (USN). This type is declared in WinNT.h as follows: typedef LONGLONG USN;
+#$$ VOID @ Any type. This type is declared in WinNT.h as follows: #define VOID void
+#$$ WCHAR @ 16-bit Unicode character. For more information, see ``Character Sets Used By Fonts.'' This type is declared in WinNT.h as follows: typedef wchar_t WCHAR;
+#$$ WINAPI @ Calling convention for system functions. This type is declared in WinDef.h as follows: #define WINAPI __stdcall
+#$$ WORD @ 16-bit unsigned integer. This type is declared in WinDef.h as follows: typedef unsigned short WORD;
+#$$ WPARAM @ Message parameter. This type is declared in WinDef.h as follows: typedef UINT_PTR WPARAM;

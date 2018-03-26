@@ -1,0 +1,19 @@
+Writing plugins to dansarina is very easy; just place an executable in
+run/ that does what you want. All plugins receive at least 4 parameters
+in the command line which are
+
+                   nickname username hostname channel
+
+so a shell script would get this information by using the variables $1,
+$2, $3 e $4. Any extra arguments come in $5, et cetera. That's all the
+input a plugin takes. 
+
+Whatever the plugin prints to the standard out goes to the IRC
+server. So, a shell script which would say something to a user could do
+it as
+
+                      echo PRIVMSG '#'$4 :$1, hi.
+
+Notice that $4 is the channel name, and $1 is the nickname. Plugins
+therefore can send any messages to the IRC server, so they can reach
+users privately, et cetera.

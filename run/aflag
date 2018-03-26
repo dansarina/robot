@@ -1,0 +1,2 @@
+#!/bin/sh
+echo "PRIVMSG #$4 :http://math.utoledo.edu/~dbastos/tmp/caro_aflag.wav"

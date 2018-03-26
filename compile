@@ -1,0 +1,3 @@
+#!/bin/sh
+# WARNING: this file was auto-generated.
+exec gcc -c -ggdb -c ${1+"$@"}

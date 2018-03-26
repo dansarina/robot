@@ -1,0 +1,58 @@
+#!/usr/local/bin/python
+#
+# fetch http://answers.com/word
+# parse; voila!
+
+import urllib
+import sys
+import re
+
+nick = sys.argv[1]
+user = sys.argv[2]
+host = sys.argv[3]
+chan = sys.argv[4]
+
+if len(sys.argv) <= 5:
+   print "PRIVMSG #"+chan+" :"+nick+", tsc tsc tsc."
+   sys.exit(0)
+
+word = "+".join(sys.argv[5:])
+
+def striptags(text):
+    finished = 0
+    while not finished:
+        finished = 1
+        start = text.find("<")
+        if start >= 0:
+            stop = text[start:].find(">")
+            if stop >= 0:
+                text = text[:start] + text[start+stop+1:]
+                finished = 0
+    return text
+
+#soc = urllib.urlopen("http://en.wikipedia.org/wiki/" + word)
+#pag = soc.read()
+#soc.close()
+
+#print pag
+#i = pag.find("<p>")
+#print pag [i:]
+
+#sys.exit(0)
+
+soc = urllib.urlopen("http://www.thefreedictionary.com/" + word)
+pag = soc.read()
+soc.close()
+
+# print regx.search('dude')
+
+i = pag.find("<b>1. </b>")
+j = pag.find('</div>',i) 
+s = striptags(pag[i:j])
+i = s.find('.') 
+s = s.replace('  ', ' ', i)
+if len(s) <= 0:
+   print "PRIVMSG #"+chan+" :"+nick+", undefined."
+else:
+   print "PRIVMSG #"+chan+" :"+nick+", "+s
+

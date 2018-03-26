@@ -1,0 +1,286 @@
+%% \section{A network of robots} Like an eggdrop robot, dansarina aims at
+%% creating a network of robots. Initiallly, I wanted to make her
+%% compatible with the eggdrop protocol, but in the process of making that
+%% happen, I became somewhat unhappy. So I decided to throw that away ---
+%% you can still recover it in some previous versions; let me guess: look
+%% for versions in the range 0.47 to 0.53; it's a guess.
+
+%% I then decided to develop dansarina's own protocol; I've never
+%% finished. I would be glad to hear if you're willing to send me a
+%% patch. I'm going to describe here what I have thought about the protocol
+%% so far.
+
+%% To link dansarina $A$ to dansarina $B$, making a connection $A \to B$,
+%% the following procedure must be followed: (1) $B$ is listening on a port
+%% $p$ when $A$ issues a [[connect]] call on $host(B)$ on port $p$.
+
+%% Then (2) $B$ prompts $A$ for a username and password. The format is 
+%% %
+%%                       $$\text{username password}$$
+%% %
+%% So yes, neither space nor newline characters are allowed in passwords or
+%% usernames. So $A$ sends this pair of information; $B$ checks their
+%% validity. If $A$ is a bot (as it is in this case), then $B$ will be
+%% waiting for the beginning and finalization of the handshaking.
+
+%% Handshaking is the process of exchange of information. That is, $A$
+%% sends some information to $B$ and $B$ sends some information to
+%% $A$. Once the handshaking is done, both $A$ and $B$ report linking
+%% established to their users on the partyline.
+
+%% \subsection{The protocol} I'm currently not very satisfied with the
+%% protocol and the implementation is not finalized. I may rewrite the
+%% protocol from scratch, since it's not done yet. If you want to do it,
+%% let me know how you plan it.
+
+%% \subsection{Introduction} Using this protocol, two or more dansarinas
+%% create a network of servers, in which users connected on each dansarina
+%% can talk to each other, no matter which IRC network they are, or even if
+%% they are in an IRC network.
+
+%% Once $X$ connects to $Y$, $Y$ may print a few lines, like a banner,
+%% giving the user some information of how to operate dansarina; for
+%% example, $Y$ may print:
+
+%% Welcome to dansarina \ver. Please, identify yourself by entering
+%% ``username password'' on the same line. For example, ``dansa'' is your
+%% username, ``mumble'' is your password; so you enter
+%% %
+%%                         $$\text{dansa mumble}$$
+%% %
+%% and then you press enter. Got it? Have fun.
+
+%% This explanation is presented because some users may login by telnet, so
+%% users can take advantage of this explanation; robots are programmed, so
+%% they don't need to learn how to authenticate; they already know it. So
+%% as we suggest, this introduction is common to both users by telnet and
+%% dansarinas.
+
+%% To allow this banner, though, we must make the protocol rather flexible,
+%% and this may be a bad idea. For example, because we can print a banner
+%% that it's meaningless to a robot, then robots must learn how to ignore
+%% nonsense messages. This sounds somewhat more complicated than what I'd
+%% like to do. Robots could have a strict communication in which any wrong
+%% step yiels a disconnection. I like that. Ideas?
+
+%% \subsection{Handshaking} After the authentication described in the
+%% introduction, robots will be identified and they begin the handshaking
+%% process; the handshaking process is the period of linking in which the
+%% following actions may take place:
+
+%%      (-) Ask for name identification
+%%      (-) Ask for version identification
+%%      (-) Ask for who is logged in
+
+%% After both parties have asked all they want, the link is considered
+%% ``established.'' Notice that, as we suggest here, dansarinas are polite
+%% robots; that is, they don't usually speak before asked. A dansarina
+%% robot doesn't tell you who she is, or what version she is, until you
+%% ask.
+
+%% Well, this looks very weird, doesn't it? To ask a question is to speak
+%% without asked. But what I mean is that the conversation is very strict;
+%% that is, a dansarina only receives data when it explicitly asks for it;
+%% anything else must be a question; and if it's not a question, then it's
+%% an illegal dialogue and the connection must be dropped.
+
+%% So, if $X$ or $Y$ wants to know anything, they have to ask. This helps
+%% the communication, I thikn. For example, if I am not ready to listen to
+%% you, it's not useful for you to starting talking. But yes, dansarina is
+%% patient to wait up to some time limit; if $X$ or $Y$ does not ask or
+%% answer anything after $x$ seconds, dansarina gets tired and offends the
+%% other robot by killing the connection.
+
+%% \subsection{Developing the language} The hard part of writing a protocol
+%% is writing the dialogues, because as we do that, we are determining the
+%% logic of the program; so if we write a complicated dialogue, we will
+%% have to abide by it with complicated code. Before we talk about the
+%% design of the flow, let's just look at what kind of questions we want to
+%% ask, and answers that we expect.
+
+%% \subsubsection{Who are you?} This command is issued to ask for name
+%% identification.
+
+%% \begin{verbatim}
+%% Q: who-are-you
+%% A: i-am nickname [comment]
+%% \end{verbatim}
+
+%% For example,
+
+%% \begin{verbatim}
+%% X: who-are-you
+%% Y: i-am joana <DAL.net>
+%% \end{verbatim}
+
+%% That is, joana likes to say that she is a DAL.net user; but she doesn't
+%% have to. The required part is anything not in between brackets. She
+%% could very well just say
+
+%% \begin{verbatim}
+%% X: who-are-you
+%% Y: i-am joana
+%% \end{verbatim}
+
+%% In fact, that's what most dansarinas do.
+
+%% \subsubsection{What version are you?}
+
+%% \begin{verbatim}
+%% Q: version
+%% A: vers 0.56
+%% \end{verbatim}
+
+%% That's it.
+
+%% \subsubsection{Who is logged in or linked with you?}
+
+%% \begin{verbatim}
+%% Q: users?
+%% A: join id robot channel nickname flags idle-number
+%% A: link branch leaf
+%% A: .
+%% \end{verbatim}
+
+%% The answer is a list of lines, so as an example, let's simulate one
+%% case. Supppose joana has two users: flag and cyb3rpunk; but flag is
+%% connected through another robot, called troller.
+
+%% \begin{verbatim}
+%% X: users?
+%% Y: join troller-10 troller party flag muf 3600
+%% Y: join joana-10 joana party cyb3rpunk uf 60
+%% Y: link joana troller
+%% Y: .
+%% \end{verbatim}
+
+%% What does this mean? Well, flag is connected on troller (troller is
+%% linked to joana with direction troller -> joana) on socket 10, he has
+%% the flags $m$, $u$ and $f$ meaning ``master'', ``user'', ``friend'' and
+%% he's currently on the channel ``party'' which is the default
+%% one. Because of his flags, we know that the user ``flag'' is a master of
+%% the bot ``troller.'' Also, we know he doesn't send any commands to
+%% dansarina for 3600 seconds.
+
+%% Now, cyb3rpunk is connected to joana directly and his socket number is
+%% 10; he is a user and friend of joana, he is idle for 60 seconds, and
+%% currently on the channel ``party.''
+
+%% As you can see, socket numbers are not a user identifier; to identify a
+%% user, you must use the pair (robot, socket-number). That's why we add
+%% the field ``id''; this field is a unique identifier; dansarinas always
+%% use this format: robotname-socketnumber. This way, a simple [[strncmp]]
+%% allows us to find a user in the network; and yes, this mechanism allows
+%% users to log in more than one in any of the robots in a network ---
+%% which is something that we would like to allow.
+
+%% Also, at this stage of the communication, $X$ or $Y$ may notice a
+%% network loop by noticing that say a user is connected to a robot which
+%% is already on the someone's side of the network; but we may check this
+%% here and on the next phase; we check because we must write some sort of
+%% defensive programming; the check will actually be made as soon as we ask
+%% [[who-are-you]] and we always ask that once for each handshaking.
+
+%% We now explain the link command.
+
+%% Supppose joana has two robots in her network; they are, troller and
+%% lorota. Troller is connected to joana, so the direction is troller $\to$
+%% joana, while joana connected herself to lorota, so the direction is
+%% lorota $\from$ joana. The way joana would say that this is the situation
+%% is by answering:
+
+%% \begin{verbatim}
+%% Y: link joana troller
+%% Y: link lorota joana
+%% \end{verbatim}
+
+%% Notice that this answer comes after the join lines when a [[users?]]  is
+%% issued. I don't see reasons to separate users and robots into two
+%% different commands. Do you see?
+
+%% So, joana is the branch of troller; troller is a leaf, while joana is
+%% herself a leaf of the branch lorota. But what if troller is a huge
+%% branch? Well, then when troller connected to joana, they would do the
+%% handshaking themselves, and by now we would know all peers because
+%% troller would've sent it to joana when he connected to her. Let's
+%% illustrate this case.
+
+%% Suppose troller has 3 robots connected to him; they are: dione, titan
+%% and tethis. Suppose dione is a branch of 2 other robots; they are,
+%% zeus and roxanne. So, when dione connected to troller, she sent:
+
+%% \begin{verbatim}
+%% link dione zeus
+%% link dione roxanne
+%% \end{verbatim}
+
+%% And when troller connected to joana, he sent
+
+%% \begin{verbatim}
+%% link troller dione
+%% link dione zeus
+%% link dione roxanne
+%% \end{verbatim}
+
+%% So that when joana connected to lorota, she sent
+
+%% \begin{verbatim}
+%% link dione zeus
+%% link dione roxanne
+%% link troller dione
+%% link joana troller
+%% \end{verbatim}
+
+%% Got it? This way, any robot in the network can figure out what the
+%% network looks like. In this case, a diagram would look like
+
+%% \begin{verbatim}
+%%                 Z     R
+%%                  \     \
+%%                   \_____\___ D ______ T
+%%                                        \
+%%                                         \_____ J _____ L
+%% \end{verbatim}
+
+%% So, $Z$ is zeus, $R$ is roxanne, $D$ is dione, $T$ is troller, $J$ is
+%% joana, and $L$ is lorota. The topology is similar to an IRC
+%% network. What happens, however, when, say, $L$ attempts a link with $T$?
+%% Well, then a loop is closed and this is not allowed. How to avoid the
+%% loop?
+
+%% When $L$ connects to $T$, $T$ will ask $L$ who he is; $L$ will say
+%% [[i-am lorota]] and $T$ will notice that he already knows $L$; that is,
+%% $L$ is already on the network, so $T$ drops the connection.
+
+%% But notice that this is defensive; because $L$ is a dansarina robot, $L$
+%% won't even attempt a connection. Any dansarina robot must ensure that
+%% only legal connections are attempted.
+
+%% The [[.]] ends the answer for the command [[users?]].
+
+%% \subsubsection{Nice to meet you}
+
+%% A link is established by performing successfully all of the steps
+%% above. After this point, no more questions are allowed; only regular
+%% conversation. To formalize this, we create the command
+%% %
+%%                       $$\text{nice-to-meet-you.}$$
+%% %
+%% This commands means that now the robots know each other and no more
+%% introductory questions are allowed; that is, the following questions
+%% will result in end of conversation: [[who-are-you]], [[users?]] and
+%% [[version]]. But commands like [[join]], [[link]], [[part]] and others
+%% which we will describe later are still valid.
+
+%% As an example, if $X$ issues [[nice-to-meet-you]] and later issues a
+%% [[who-are-you]] to $Y$, $Y$ will offend $X$ by killing the connection.
+
+%% \subsubsection{Examples}
+%%
+%% Let's look at some conversation samples so that we can have a good idea
+%% of how the handshaking takes place and the logic flow must be written. X
+%% requests connection to Y; so the following conversation takes place from
+%% the point of view of X. We write [[>>]] to mean output and [[<<]] to
+%% mean input.
+
+\end{document}

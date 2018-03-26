@@ -1,0 +1,43 @@
+#!/bin/sh
+
+case $1 in go*) shift;
+
+exec 3>&1; exec 1>&7;
+
+echo GET http://en.wikipedia.org/wiki/$5 HTTP/1.0
+echo User-Agent: dansarina
+echo Host: en.wikipedia.org
+echo
+
+exec 1>&3
+
+awk ' 
+/^<p>.*<\/p>$/ { 
+
+  printf "PRIVMSG #%s :", "'$4'";
+
+  if ( match($0, /Wikipedia does not have an article with this/) ) {
+    printf "%s, nobody cares about %s. You know?\n", "'$1'", "'$5'"; 
+    exit 0;
+  }
+
+  if ( match($0, /(can)? refer to[:]?|mean:|may be:/) ) {
+    printf "%s, %s is too ambiguous.\n", "'$1'", "'$5'"; 
+    exit 0;
+  }
+
+  gsub(/<[^>]*>/,""); gsub(/\([^)].*\)/,""); gsub(/  /," "); gsub(/ ,/,",");
+
+  if (!length($0)) {
+    printf "%s, I got nothing on %s for you.\n", "'$1'", "'$5'";
+    exit 0;
+  }
+
+  printf "%s, %s\n", "'$1'", 
+              (length($0) > 300) ? substr($0,0,300) "..." : $0; exit 0;
+
+}' <&6 ;; *)
+
+exec /usr/local/bin/tcpclient en.wikipedia.org 80 ./run/def go $@ 
+
+;; esac 

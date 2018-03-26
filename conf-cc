@@ -1,0 +1,3 @@
+gcc -c -ggdb
+This will be used to compile .c files.
+-O2 -Wall
