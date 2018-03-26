@@ -1,0 +1,98 @@
+<html>
+<head>
+  <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dansarina</title>
+</head>
+
+<body>
+
+<h2>Dansarina</h2>
+
+Download: <a href="files/dansarina-0.63.tar.gz">dansarina-0.63.tar.gz</a>
+
+<p>Dansarina is a fast, portable, event-driven IRC robot. She depends
+very little on the libc, and compiles on any modern UNIX system. At
+start up, dansarina connects to the IRC server and listens on a port
+for a possible telnet connection, so that an administrator can control
+her without joining the IRC network. She has a plugin system that
+works like a shell --- possible security concerns lies in the plugins,
+not in dansarina; she does not use system() or popen(). IRC clients
+can connect to her through a DCC chat after authentication.
+
+<p>Up to version 0.60, she can link herself to another dansarina for a
+robot network. She comes with a script system --- she is able to
+execute scripts and reply back the script outputs, so users can look
+up words in dictionaries on the web and things like that.  (You must
+write the script yourself, but it can be in any language.  It's the
+UNIX system itself that runs them.  Yes, security is your
+responsibility.)
+
+<h2>Installation</h2> 
+
+Just unpack and say ``make.''  She'll run in the same directory.  If
+you'd like to install somewhere else, just copy dansarina, plugger,
+and the directories run/, ctl/, and hlp/.  That's all.  After
+unpacking, her configuration is in ctl/.  The files are intuitive.
+Always write one whole line in these files; that is, end your strings
+with \n; otherwise she'll complain.
+
+<h2>About plugger</h2>
+
+Plugger is the plugin daemon; dansarina executes it at start up and
+connects a pipe to it. They have a simple protocol of communication
+and plugger manages the whole overhead of the plugins. Plugins do not
+execute in sequential order; a slow one --- such as one that queries
+the network --- may begin first, and end later than another one;
+plugger takes care of running them in background.
+
+<p>See <a href="files/dansarina.pdf">this</a> for a detailed
+description of the implementation of plugger.
+
+<a name="history"</a>
+<h2>History</h2>
+
+A high version number does not necessarily mean a newer version. The
+sequence is as follows.
+
+<br><br>
+
+<a href="files/dansarina-0.1.tar.gz">dansarina-0.1.tar.gz</a><br>
+<a href="files/dansarina-0.2.tar.gz">dansarina-0.2.tar.gz</a><br>
+<a href="files/dansarina-0.3.tar.gz">dansarina-0.3.tar.gz</a><br>
+<a href="files/dansarina-0.5.tar.gz">dansarina-0.5.tar.gz</a><br>
+<a href="files/dansarina-0.7.tar.gz">dansarina-0.7.tar.gz</a><br>
+<a href="files/dansarina-0.8.tar.gz">dansarina-0.8.tar.gz</a><br>
+<a href="files/dansarina-0.90.tar.gz">dansarina-0.90.tar.gz</a><br>
+<a href="files/dansarina-0.91.tar.gz">dansarina-0.91.tar.gz</a><br>
+<a href="files/dansarina-0.92.tar.gz">dansarina-0.92.tar.gz</a><br>
+<a href="files/dansarina-0.93.tar.gz">dansarina-0.93.tar.gz</a><br>
+<a href="files/dansarina-0.94.tar.gz">dansarina-0.94.tar.gz</a><br>
+<a href="files/dansarina-0.40.tar.gz">dansarina-0.40.tar.gz</a><br>
+<a href="files/dansarina-0.41.tar.gz">dansarina-0.41.tar.gz</a><br>
+<a href="files/dansarina-0.42.tar.gz">dansarina-0.42.tar.gz</a><br>
+<a href="files/dansarina-0.44.tar.gz">dansarina-0.44.tar.gz</a><br>
+<a href="files/dansarina-0.45.tar.gz">dansarina-0.45.tar.gz</a><br>
+<a href="files/dansarina-0.46.tar.gz">dansarina-0.46.tar.gz</a><br>
+<a href="files/dansarina-0.47.tar.gz">dansarina-0.47.tar.gz</a><br>
+<a href="files/dansarina-0.48.tar.gz">dansarina-0.48.tar.gz</a><br>
+<a href="files/dansarina-0.49.tar.gz">dansarina-0.49.tar.gz</a><br>
+<a href="files/dansarina-0.50.tar.gz">dansarina-0.50.tar.gz</a><br>
+<a href="files/dansarina-0.51.tar.gz">dansarina-0.51.tar.gz</a><br>
+<a href="files/dansarina-0.52.tar.gz">dansarina-0.52.tar.gz</a><br>
+<a href="files/dansarina-0.53.tar.gz">dansarina-0.53.tar.gz</a><br>
+<a href="files/dansarina-0.54.tar.gz">dansarina-0.54.tar.gz</a><br>
+<a href="files/dansarina-0.55.tar.gz">dansarina-0.55.tar.gz</a><br>
+<a href="files/dansarina-0.56.tar.gz">dansarina-0.56.tar.gz</a><br>
+<a href="files/dansarina-0.57.tar.gz">dansarina-0.57.tar.gz</a><br>
+<a href="files/dansarina-0.58.tar.gz">dansarina-0.58.tar.gz</a><br>
+<a href="files/dansarina-0.59.tar.gz">dansarina-0.59.tar.gz</a><br>
+<a href="files/dansarina-0.60.tar.gz">dansarina-0.60.tar.gz</a><br>
+<a href="files/dansarina-0.61.tar.gz">dansarina-0.61.tar.gz</a><br>
+<a href="files/dansarina-0.62.tar.gz">dansarina-0.62.tar.gz</a><br>
+<a href="files/dansarina-0.63.tar.gz">dansarina-0.63.tar.gz</a>
+
+<br><br>
+Created: Tue Aug 01 00:59:29 EDT 2006.<br> 
+Updated: Fri Aug 04 00:25:46 EDT 2006.<br>
+</body>
